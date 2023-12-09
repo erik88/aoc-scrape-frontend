@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf8" />
+		<title>AoC Piktiv 2023</title>
+		<style>
+			body {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 1rem;
+			}
+			#updated-container {
+				text-align: center;
+			}
+			.players {
+				border-spacing: 1rem 0.5rem;
+			}
+			.player-leaderboard-name {
+				font-style: italic;
+				color: #aaa;
+			}
+			#teams {
+				display: inline-block;
+			}
+			.team {
+				display: block;
+				border: 1px solid black;
+			}
+			.team summary {
+				cursor: pointer;
+				padding: 0.5rem;
+				background: rgb(210, 228, 255);
+			}
+			.team summary:hover {
+				cursor: pointer;
+				padding: 0.5rem;
+				background: rgb(231, 241, 255);
+			}
+			summary::marker {
+				color: rgba(0, 0, 0, 0); /* invisible pls */
+			}
+			.team-score {
+				font-size: 1.5rem;
+				margin-right: 2rem;
+				width: 4rem;
+				display: inline-block;
+			}
+			.team-name {
+				font-size: 1.5rem;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="updated-container">
+			<div>Data fetched:</div>
+			<div id="last-updated">Loading...</div>
+		</div>
+		<div id="players"></div>
+		<div id="teams"></div>
+	</body>
+	<script>
+		let playersDiv, teamsDiv, lastUpdatedElement;
+		document.addEventListener("DOMContentLoaded", async () => {
+			playersDiv = document.querySelector("#players");
+			teamsDiv = document.querySelector("#teams");
+			lastUpdatedElement = document.querySelector("#last-updated");
+
+			// Let's not overcomplicate async-stuff. First wait for DOMContentLoaded, then fetch.
+			const result = await fetch(
+				"https://aoc2023storage.blob.core.windows.net/aoc2023container/output.json"
+			);
+			const data = await result.json();
+			// const data = {
+			// 	lastUpdated: 1702133303,
+			// 	players: [
+			// 		{ name: "Erik Lissel", score: 981, stars: 18 },
+			// 		{ name: "Kenneth Jonsson", score: 907, stars: 18 },
+			// 		{ name: "Fredrik Åkerblom", score: 869, stars: 18 },
+			// 		{ name: "Jesper Evertsson", score: 867, stars: 18 },
+			// 		{ name: "Chris", score: 844, stars: 18 },
+			// 		{ name: "Bryan Curchod", score: 788, stars: 18 },
+			// 		{ name: "Dongping Sun", score: 779, stars: 16 },
+			// 		{ name: "Susan Lieu", score: 736, stars: 18 },
+			// 		{ name: "Felix Wallquist", score: 729, stars: 16 },
+			// 		{ name: "Victor Björkgren", score: 729, stars: 16 },
+			// 		{ name: "Robbin Torstensson", score: 697, stars: 18 },
+			// 		{ name: "Tim Bergqvist", score: 685, stars: 14 },
+			// 		{ name: "Sara Acarsoy", score: 638, stars: 16 },
+			// 		{ name: "Ehsan Zaeimzadeh", score: 636, stars: 16 },
+			// 		{ name: "Morgan Sponton", score: 634, stars: 15 },
+			// 		{ name: "Benjamin", score: 630, stars: 16 },
+			// 		{ name: "Adam Skoglund", score: 610, stars: 15 },
+			// 		{ name: "VMormoris", score: 606, stars: 16 },
+			// 		{ name: "Carojen", score: 598, stars: 16 },
+			// 		{ name: "Kristoffer Jakobsson", score: 521, stars: 13 },
+			// 		{ name: "jonatansimonsson", score: 515, stars: 11 },
+			// 		{ name: "junweiyu", score: 452, stars: 14 },
+			// 		{ name: "AlbinDahlheim", score: 436, stars: 13 },
+			// 		{ name: "Hans Westman", score: 402, stars: 10 },
+			// 		{ name: "SimonJohanssonPiktiv", score: 398, stars: 9 },
+			// 		{ name: "aeand", score: 392, stars: 12 },
+			// 		{ name: "Jonas Bjering", score: 389, stars: 12 },
+			// 		{ name: "Wessl", score: 380, stars: 13 },
+			// 		{ name: "AxelKrantzPiktiv", score: 377, stars: 10 },
+			// 		{ name: "(anonymous user #3308896)", score: 306, stars: 12 },
+			// 		{ name: "karl97", score: 289, stars: 9 },
+			// 		{ name: "Linnea Almlöf", score: 280, stars: 10 },
+			// 		{ name: "Friiie", score: 228, stars: 8 },
+			// 		{ name: "Marwan-Piktiv", score: 183, stars: 8 },
+			// 		{ name: "Marcus Ekelund", score: 115, stars: 4 },
+			// 		{ name: "Jonathan Börjesson", score: 88, stars: 4 },
+			// 		{ name: "Murrent", score: 78, stars: 3 },
+			// 		{ name: "Simon Hansson", score: 78, stars: 2 },
+			// 		{ name: "Hannes Kindströmmer", score: 0, stars: 0 },
+			// 		{ name: "Johan Lind", score: 0, stars: 0 },
+			// 		{ name: "Jenny Söderberg", score: 0, stars: 0 },
+			// 		{ name: "SusanLieuPiktiv", score: 0, stars: 0 },
+			// 		{ name: "emelie axelsson", score: 0, stars: 0 },
+			// 		{ name: "Kenneth Jonsson", score: 0, stars: 0 },
+			// 		{ name: "Love Wessman", score: 0, stars: 0 },
+			// 		{ name: "Majisen", score: 0, stars: 0 },
+			// 		{ name: "Marcus Bjering", score: 0, stars: 0 },
+			// 		{ name: "Karl Baecklund", score: 0, stars: 0 },
+			// 		{ name: "Olle Axelsson", score: 0, stars: 0 },
+			// 		{ name: "PiktivME", score: 0, stars: 0 },
+			// 		{ name: "pontuswallquist", score: 0, stars: 0 },
+			// 		{ name: "PikJes", score: 0, stars: 0 },
+			// 		{ name: "Robbin Torstensson", score: 0, stars: 0 },
+			// 		{ name: "Sebastian Lundgren", score: 0, stars: 0 },
+			// 		{ name: "ehsanzaeimzadeh", score: 0, stars: 0 },
+			// 	],
+			// };
+			setLastUpdated(data.lastUpdated);
+			setPlayers(data.players);
+		});
+
+		function setLastUpdated(unixSeconds) {
+			lastUpdatedElement.innerHTML = new Date(unixSeconds * 1000);
+		}
+
+		function setPlayers(leaderboardPlayers) {
+			let piktivPlayers = getPiktivPlayers();
+			let s = "";
+
+			let teams = {};
+			for (let p of piktivPlayers) {
+				const lp = leaderboardPlayers.find((x) => x.name === p[1]);
+				let stars = lp?.stars ?? 0;
+				teams[p[2]] = teams[p[2]] ?? [];
+				teams[p[2]].push({
+					leaderboardName: lp?.name || "?",
+					realName: p[0],
+					stars,
+				});
+			}
+
+			let teamsSorted = Object.entries(teams).map(([teamName, players]) => {
+				players.sort((a, b) => Math.sign(b.stars - a.stars));
+
+				const totalStars = players
+					.map((p) => p.stars)
+					.reduce((x, y) => x + y, 0);
+
+				return {
+					teamName,
+					score: totalStars / players.length,
+					players,
+				};
+			});
+			teamsSorted.sort((a, b) => Math.sign(b.score - a.score));
+
+			let s2 = "";
+			for (const team of teamsSorted) {
+				const score = team.score.toFixed(1);
+				s2 += `<details class="team"><summary><span class="team-score">${score}</span><span class="team-name">${team.teamName}</span></summary><table class="players">`;
+				for (const p of team.players) {
+					s2 += `<tr class="player"><td class="player-score">${p.stars}</td><td>${p.realName}</td><td class="player-leaderboard-name">${p.leaderboardName}</td></tr>`;
+				}
+				s2 += `</table></details>`;
+			}
+			teamsDiv.innerHTML = s2;
+		}
+
+		function unknownNames() {
+			return;
+			[
+				"VMormoris",
+				"Carojen",
+				"aeand",
+				"(anonymous user #3308896)",
+				"karl97",
+				"Murrent",
+			];
+		}
+
+		function getPiktivPlayers(playerId) {
+			return [
+				["Jenny Söderberg", "Jenny Söderberg", "Alice"],
+				["Robbin Torstensson", "Robbin Torstensson", "Alice"],
+				["Fredrik Åkerblom", "Fredrik Åkerblom", "Alice"],
+				["Karl Eriksson", "?", "Alice"],
+				["Alen Gazibegovic", "?", "Alice"],
+				["Adam Skoglund", "Adam Skoglund", "Goat"],
+				["Marcus Eklund", "Marcus Ekelund", "Goat"],
+				["Simon Johansson", "SimonJohanssonPiktiv", "Goat"],
+				["Jonathan Börjesson", "Jonathan Börjesson", "Goat"],
+				["Axel Holm", "?", "Goat"],
+				["Marwan Al Salman", "Marwan-Piktiv", "Goat"],
+				["Olle Axelsson", "?", "Valheim/Caged Element"],
+				["Love Wessman", "Wessl", "Valheim/Caged Element"],
+				["Morgan Sponton", "Morgan Sponton", "Valheim/Caged Element"],
+				["Simon Hansson", "Simon Hansson", "Valheim/Caged Element"],
+				["Victor Björkgren", "Victor Björkgren", "Valheim/Caged Element"],
+				["Martin Vickgren", "?", "Valheim/Caged Element"],
+				["Bryan Curchod", "Bryan Curchod", "XM PAT"],
+				["Fria Khorshid", "Friiie", "XM PAT"],
+				["Felix Hansson", "?", "XM PAT"],
+				["Christoffer Cederfeldt", "Chris", "XM PAT"],
+				["Albin Dahlheim", "AlbinDahlheim", "XM PAT"],
+				["Erik Lissel", "Erik Lissel", "XM PAT"],
+				["Susan Lieu", "Susan Lieu", "XM Promos"],
+				["Jesper Kanewoff", "?", "XM Promos"],
+				["Junwei Yu", "junweiyu", "XM Promos"],
+				["Vasileios Mormoris", "?", "XM Promos"],
+				["Jesper Evertsson", "Jesper Evertsson", "XM Promos"],
+				["Sara Nil Acarsoy", "Sara Acarsoy", "XM R&I"],
+				["Kristoffer Jakobsson", "Kristoffer Jakobsson", "XM R&I"],
+				["Hans Westman", "Hans Westman", "XM R&I"],
+				["Anton Andersson", "?", "XM R&I"],
+				["Benjamin Larsson", "Benjamin", "XM R&I"],
+				["Tim Bergqvist", "Tim Bergqvist", "Impulso"],
+				["Sebastian Alkstrand", "?", "Impulso"],
+				["Hannes Kindströmmer", "?", "Impulso"],
+				["Karl Baecklund", "Karl Baecklund", "Impulso"],
+				["Linnea Almlööf", "Linnea Almlöf", "Impulso"],
+				["Joe (Donping Sun)", "Dongping Sun", "Impulso"],
+				["Bogdan Drozdowski", "?", "XM Core"],
+				["Pontus Wallquist", "pontuswallquist", "XM Core"],
+				["Jonatan Simonsson", "jonatansimonsson", "XM Core"],
+				["Felix Wallquist", "Felix Wallquist", "XM Core"],
+				["Axel Krantz", "AxelKrantzPiktiv", "XM Core"],
+				["Per Asplund", "?", "XM Core"],
+				["Jonas Bjering", "Jonas Bjering", "the nameless team"],
+				["Kenneth Jonsson", "Kenneth Jonsson", "the nameless team"],
+				["Ehsan Zaeimzadeh", "Ehsan Zaeimzadeh", "the nameless team"],
+			];
+		}
+	</script>
+</html>
