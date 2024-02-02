@@ -2,6 +2,7 @@
 <html>
 	<head>
 		<meta charset="utf8" />
+		<link rel="icon" href="data:," />
 		<title>AoC Piktiv 2023</title>
 		<style>
 			body {
@@ -68,7 +69,8 @@
 
 			// Let's not overcomplicate async-stuff. First wait for DOMContentLoaded, then fetch.
 			const result = await fetch(
-				"https://aoc2023storage.blob.core.windows.net/aoc2023container/output.json"
+				//"https://aoc2023storage.blob.core.windows.net/aoc2023container/output.json"
+				"output.json"
 			);
 			const data = await result.json();
 
